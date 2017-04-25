@@ -1,0 +1,8 @@
+syntax = "proto2";
+package com.xiegengcai.demo.proto;
+
+option java_outer_classname = "Message";
+message User {
+    required string name        = 1;
+    required string password    = 2;
+}

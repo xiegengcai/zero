@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+            http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.springframework.org/schema/context
+            http://www.springframework.org/schema/context/spring-context.xsd">
+    <!-- 将多个配置文件读取到容器中，交给Spring管理 -->
+    <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations">
+            <list>
+                <value>classpath:conf/config.properties</value>
+            </list>
+        </property>
+    </bean>
+
+    <context:annotation-config />
+    <!-- 扫描zero核心bean -->
+    <context:component-scan base-package="com.xiegengcai.zero" use-default-filters="false">
+        <context:include-filter type="annotation" expression="org.springframework.stereotype.Service" />
+        <context:include-filter type="annotation" expression="org.springframework.stereotype.Component" />
+        <context:exclude-filter type="annotation" expression="com.xiegengcai.zero.annotation.ZeroBean" />
+    </context:component-scan>
+    <bean name="dispatcher" class="com.xiegengcai.zero.server.ZeroServiceDispatch"/>
+    <!-- 扫描本模块bean -->
+    <context:component-scan base-package="com.xiegengcai.zero.client" use-default-filters="false">
+        <context:include-filter type="annotation" expression="com.xiegengcai.zero.annotation.ZeroBean" />
+        <context:include-filter type="annotation" expression="org.springframework.stereotype.Component" />
+        <context:include-filter type="annotation" expression="org.springframework.stereotype.Service" />
+    </context:component-scan>
+
+    <bean id="codec" class="com.xiegengcai.zero.codec.DefaultCodec" />
+    <bean id="clientConf" class="com.xiegengcai.zero.conf.ClientConf"/>
+
+    <bean class="com.xiegengcai.zero.client.ZeroClient">
+        <constructor-arg name="clientConf" ref="clientConf"/>
+        <constructor-arg name="clientInitializer">
+            <bean class="com.xiegengcai.zero.client.ZeroClientInitializer">
+                <constructor-arg name="codec" ref="codec"/>
+                <constructor-arg name="handler">
+                    <bean class="com.xiegengcai.zero.client.ZeroClientHandler">
+                        <constructor-arg name="dispatcher">
+                            <bean class="com.xiegengcai.zero.client.ZeroClientDispatcher"/>
+                        </constructor-arg>
+                    </bean>
+                </constructor-arg>
+            </bean>
+        </constructor-arg>
+    </bean>
+
+</beans>
